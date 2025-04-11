@@ -1,0 +1,11 @@
+pandas
+datetime
+requests
+beautifulsoup4
+pillow
+pytesseract
+regex
+selenium
+psycopg2-binary
+sqlalchemy
+boto3

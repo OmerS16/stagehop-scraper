@@ -1,0 +1,56 @@
+FROM public.ecr.aws/lambda/python:3.9
+
+# Install system dependencies required for Chrome and Chromedriver
+RUN yum install -y \
+    alsa-lib \
+    atk \
+    cups-libs \
+    gtk3 \
+    libXcomposite \
+    libXcursor \
+    libXdamage \
+    libXext \
+    libXi \
+    libXrandr \
+    libXrender \
+    libXScrnSaver \
+    libXtst \
+    pango \
+    dbus-glib \
+    libdbus-glib-1.so.2 \
+    xorg-x11-server-Xvfb \
+    libX11 \
+    libxcb \
+    libX11-xcb \
+    xorg-x11-fonts-100dpi \
+    xorg-x11-fonts-75dpi \
+    xorg-x11-fonts-cyrillic \
+    xorg-x11-fonts-misc \
+    xorg-x11-fonts-Type1 \
+    liberation-fonts \
+    wget \
+    unzip
+
+# Copy requirements.txt and install dependencies
+COPY main_scraper/requirements.txt ${LAMBDA_TASK_ROOT}
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy your application code
+COPY main_scraper/ ${LAMBDA_TASK_ROOT}/
+
+# Copy shared scraping modules into the container
+COPY scrapers/ ${LAMBDA_TASK_ROOT}/scrapers
+
+# Copy chromedriver and chrome-linux64 folder from your local bin folder into the container
+COPY bin/chromedriver /usr/local/bin/chromedriver
+RUN chmod +x /usr/local/bin/chromedriver
+
+COPY bin/chrome-linux64 /usr/local/bin/chrome-linux64
+RUN chmod +x /usr/local/bin/chrome-linux64/chrome
+
+# Set environment variable to point to your chrome binary
+ENV CHROME_BIN=/usr/local/bin/chrome-linux64/chrome
+
+CMD [ "scraper_lambda.lambda_handler" ]
+
+

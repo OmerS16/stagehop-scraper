@@ -1,0 +1,12 @@
+FROM public.ecr.aws/lambda/python:3.9
+
+# Copy requirements.txt and install dependencies
+COPY uploader/requirements.txt ${LAMBDA_TASK_ROOT}
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy your application code
+COPY uploader/ ${LAMBDA_TASK_ROOT}/
+
+CMD [ "uploader_lambda.lambda_handler" ]
+
+

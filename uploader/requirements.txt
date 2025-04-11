@@ -1,0 +1,4 @@
+pandas
+sqlalchemy
+boto3
+psycopg2-binary
