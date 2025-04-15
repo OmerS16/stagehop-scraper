@@ -35,20 +35,20 @@ def extract_info(part, img_df):
     return df_results
 
 def convert_dates(date_str):
-    date_str = datetime.strptime(date_str, '%d.%m.%Y')
+    date_str = datetime.strptime(date_str, '%d.%m')
     date_str = date_str.replace(year=datetime.now().year)
     return date_str
 
 chrome_options = Options()
-chrome_options.add_argument("--headless")
-chrome_options.add_argument("--disable-gpu")
+# chrome_options.add_argument("--headless")
+# chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--window-size=1920,1080")
 chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
 chrome_options.add_argument("--no-sandbox")
-chrome_options.add_argument("--disable-dev-shm-usage")
-chrome_options.add_argument("--user-data-dir=/tmp/chrome-data")
-chrome_options.binary_location = "/usr/local/bin/chrome-linux64/chrome"
-service = Service('/usr/local/bin/chromedriver')
+# chrome_options.add_argument("--disable-dev-shm-usage")
+# chrome_options.add_argument("--user-data-dir=/tmp/chrome-data")
+# chrome_options.binary_location = "/usr/local/bin/chrome-linux64/chrome"
+service = Service(r"C:\Users\Omer\Desktop\Coding\concerts project\scraper\chromedriver.exe")
 driver = webdriver.Chrome(service=service, options=chrome_options)
 
 driver.get('https://www.instagram.com/holybar/p/DF2QTMlIsGL/?img_index=1')
@@ -63,8 +63,8 @@ links_url = [link.get_attribute('href') for link in links]
 post_pattern = re.compile(r'https://www.instagram.com/holybar/p/')
 posts = [link.get_attribute('href') for link in links if post_pattern.search(link.get_attribute('href') or '')] 
 
-last_post = posts[1]
-# last_post = 'https://www.instagram.com/holybar/p/DG-w3exIbxm/'
+# last_post = posts[1]
+last_post = 'https://www.instagram.com/holybar/p/DGILdM2IGUs/'
 driver.get(last_post)
 time.sleep(5)
 

@@ -23,7 +23,7 @@ def upload_to_rds(df: pd.DataFrame, table_name: str = 'events'):
 
         print("Uploading DataFrame to RDS...")
         t0 = time.time()
-        df.to_sql(table_name, engine, if_exists='replace', index=False)
+        df.to_sql(table_name, engine, if_exists='append', index=False)
         print(f"Uploaded {len(df)} records to table '{table_name}' in database '{db_name}'.")
         print(f"Upload finished in {time.time() - t0:.2f} seconds")
 
