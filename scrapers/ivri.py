@@ -22,15 +22,30 @@ def scrape():
     for event in soup.find_all('div', class_='mq7Mp3'):
         title_container = event.find('a', class_='DjQEyU')
         title = title_container.get_text(strip=True)
-        if title == 'ערב מצחק בעברי':
+        if "מצחק" in title:
             continue
         date = event.find('div', class_='v2vbgt pRRkmP').get_text(strip=True)
         _, date = date.split(', ')
         for hebrew, english in months_map.items():
             date = date.replace(hebrew, english)
-        date = datetime.strptime(date, '%d %B')
-        date = date.replace(year=datetime.now().year)
         link = title_container.get('href')
+        inner_res = requests.get(link)
+        inner_soup = BeautifulSoup(inner_res.text, 'html.parser')
+        inner_res_html = inner_res.content
+        hour = inner_soup.find('p', class_='W0S903 gUQoiT eR02y5 PUuajU').get_text(strip=True)
+        pattern = re.compile(r'\bמופע[\-\u2013](\d+)\b')
+        match = re.search(pattern, hour)
+        if match:
+            hour = match.group(1)
+        else:
+            hour = inner_soup.find('p', class_='ALQLki tN7ge3').get_text(strip=True)
+            hour = hour.split(', ', 1)[1].split(' – ', 1)[0]
+        if ':' not in hour:
+            hour += ':00'
+        date = date + ' ' + hour
+        date = datetime.strptime(date, '%d %B %H:%M')
+        date = date.replace(year=datetime.now().year)
+        
         img = event.find('img').get('src')
         img = img.replace('blur_2,', '')
         img = re.sub(r"w_\d+", "w_500", img)
