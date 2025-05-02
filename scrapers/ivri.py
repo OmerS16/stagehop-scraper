@@ -7,7 +7,7 @@ import re
 def scrape():
     months_map = {
         "בינו׳": "January", "בפבר׳": "February", "במרץ": "March", "באפר׳": "April",
-        "במאי": "May", "ביונ׳": "June", "ביול׳": "July", "באוג׳": "August",
+        "במאי": "May", "ביוני": "June", "ביולי": "July", "באוג׳": "August",
         "בספט׳": "September", "באוק׳": "October", "בנוב׳": "November", "בדצמ׳": "December"
     }
     
