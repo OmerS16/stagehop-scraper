@@ -121,6 +121,8 @@ def scrape():
                     ],
                 }],
             )
+            if response:
+                print('AI successfully responded')
         except:
             print('AI failed to respond')
 

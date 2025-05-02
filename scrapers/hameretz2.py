@@ -7,6 +7,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import json
 from dateutil import parser
 import pytz
+import pandas as pd
 
 def scrape():
     chrome_options = Options()
