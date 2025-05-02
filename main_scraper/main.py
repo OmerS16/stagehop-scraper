@@ -1,6 +1,7 @@
 from scrapers import amama, barby, beit_hayotzer, guestroom, guitar_loft, haezor, hameretz2, holybar, ivri, levontin, ozenbar, shablul, tassa, tmuna
 import pandas as pd
 import time
+import hashlib
 
 def run_scrape(venue) -> pd.DataFrame:
     venue_df = pd.DataFrame()
@@ -11,6 +12,11 @@ def run_scrape(venue) -> pd.DataFrame:
     except Exception as e:
        print(f'{venue} failed: {e}')
     return venue_df
+
+def make_event_hash(row, length: int = 12) -> str:
+    base = f"{row['show_name'].strip()}|{row['date'].strftime('%Y-%m-%d')}|{row['venue'].strip()}"
+    h = hashlib.sha256(base.encode("utf-8")).hexdigest()
+    return h[:length] # first 12 hex chars
 
 def main():
     amama_df = run_scrape(amama)
@@ -33,4 +39,6 @@ def main():
            ozenbar_df, shablul_df, tassa_df, tmuna_df]
     
     events = pd.concat(dfs, ignore_index=True)
+    events['id'] = events.apply(make_event_hash, axis=1)
+
     return events
