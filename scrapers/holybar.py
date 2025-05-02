@@ -125,4 +125,6 @@ def scrape():
         events = json.loads(response_json)
         
     driver.quit()
+    
+    events = pd.DataFrame(events)
     return events

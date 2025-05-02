@@ -46,4 +46,5 @@ def scrape():
 
     driver.quit()
         
+    events = pd.DataFrame(events)
     return events
