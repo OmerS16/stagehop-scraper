@@ -96,7 +96,7 @@ def scrape():
             date = date + ' 20:45'
             date = datetime.strptime(date, '%A, %B %d %H:%M')
             date = date.replace(year=datetime.now().year)
-            events.append({'show_name':title, 'date':date, 'link':last_post, 'img':None, 'venue': 'Holy Bar'})
+            events.append({'show_name':title, 'date':date, 'link':last_post})
         events = pd.DataFrame(events)
     
     else:
@@ -139,4 +139,6 @@ def scrape():
     driver.quit()
 
     events = pd.DataFrame(events)
+    events['img'] = "https://instagram.ftlv8-1.fna.fbcdn.net/v/t51.2885-19/83984373_329182648085048_2078471099787075725_n.jpg?stp=dst-jpg_s320x320_tt6&_nc_ht=instagram.ftlv8-1.fna.fbcdn.net&_nc_cat=108&_nc_oc=Q6cZ2QEEgU0s_pdlx7KmCR0ged71YiCGuKqlPIjSMTEhcitnsKWjrDdafiJmjZHgP0BB53E&_nc_ohc=n_kCI-I_hAMQ7kNvwF0T_ae&_nc_gid=-ysnazI2jGVai6R063wiAQ&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AfFZ2zo0SOJWYap2PkvgRV_yiCMMjVObptG0WXpIsgZKvg&oe=681B109F&_nc_sid=8b3546"
+    events['venue'] = 'Holy Bar'
     return events
