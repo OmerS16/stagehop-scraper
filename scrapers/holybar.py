@@ -107,24 +107,32 @@ def scrape():
             raise IndexError('no lineup found')
         
         client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
-        response = client.responses.create(
-            model="gpt-4o-mini",
-            input=[{
-                "role": "user",
-                "content": [
-                    {"type": "input_text", "text": "Extract all the shows' names and dates to json with keys: show_name, date"},
-                    {
-                        "type": "input_image",
-                        "image_url": matching_img,
-                    },
-                ],
-            }],
-        )
+        try:
+            response = client.responses.create(
+                model="gpt-4o-mini",
+                input=[{
+                    "role": "user",
+                    "content": [
+                        {"type": "input_text", "text": "Extract all the shows' names and dates to json with keys: show_name, date"},
+                        {
+                            "type": "input_image",
+                            "image_url": matching_img,
+                        },
+                    ],
+                }],
+            )
+        except:
+            print('AI failed to respond')
+
         response_text = response.output_text
         response_json = response_text.strip('`').strip('json').strip()
-        events = json.loads(response_json)
+
+        try:
+            events = json.loads(response_json)
+        except:
+            print('Bad JSON given by AI')
         
     driver.quit()
-    
+
     events = pd.DataFrame(events)
     return events
