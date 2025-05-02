@@ -1,4 +1,4 @@
-from scrapers import amama, barby, beit_hayotzer, guestroom, guitar_loft, haezor, hameretz2, ivri, levontin, ozenbar, shablul, tassa, tmuna
+from scrapers import amama, barby, beit_hayotzer, guestroom, guitar_loft, haezor, hameretz2, holybar, ivri, levontin, ozenbar, shablul, tassa, tmuna
 import pandas as pd
 import time
 
@@ -20,6 +20,7 @@ def main():
     guitar_loft_df = run_scrape(guitar_loft)
     haezor_df = run_scrape(haezor)
     hameretz_df = run_scrape(hameretz2)
+    holybar_df = run_scrape(holybar)
     ivri_df = run_scrape(ivri)
     levontin_df = run_scrape(levontin)
     ozenbar_df = run_scrape(ozenbar)
@@ -28,7 +29,7 @@ def main():
     tmuna_df = run_scrape(tmuna)
     
     dfs = [amama_df, barby_df, beit_hayotzer_df, guestroom_df, guitar_loft_df, 
-           haezor_df, hameretz_df, ivri_df, levontin_df, 
+           haezor_df, hameretz_df, holybar_df, ivri_df, levontin_df, 
            ozenbar_df, shablul_df, tassa_df, tmuna_df]
     
     events = pd.concat(dfs, ignore_index=True)
