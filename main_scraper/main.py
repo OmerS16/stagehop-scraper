@@ -14,7 +14,7 @@ def run_scrape(venue) -> pd.DataFrame:
     return venue_df
 
 def make_event_hash(row, length: int = 12) -> str:
-    base = f"{row['show_name'].strip()}|{row['date'].strftime('%Y-%m-%d')}|{row['venue'].strip()}"
+    base = f"{row['show_name'].strip()}|{row['date']}|{row['venue'].strip()}"
     h = hashlib.sha256(base.encode("utf-8")).hexdigest()
     return h[:length] # first 12 hex chars
 
