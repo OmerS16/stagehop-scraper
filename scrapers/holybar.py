@@ -113,7 +113,7 @@ def scrape():
                 input=[{
                     "role": "user",
                     "content": [
-                        {"type": "input_text", "text": "Extract all the shows' names and dates to json with keys: show_name, date"},
+                        {"type": "input_text", "text": "Extract all the shows' names and dates to json with keys: show_name, date. Do not add any text to the response so I could convert your response to json."},
                         {
                             "type": "input_image",
                             "image_url": matching_img,
