@@ -127,7 +127,9 @@ def scrape():
             print('AI failed to respond')
 
         response_text = response.output_text
+        print(response_text)
         response_json = response_text.strip('`').strip('json').strip()
+        print(response_json)
 
         try:
             events = json.loads(response_json)
