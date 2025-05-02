@@ -44,7 +44,6 @@ def scrape():
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--single-process")
-    chrome_options.add_argument("--remote-debugging-port=9222")
     chrome_options.binary_location = "/usr/local/bin/chrome-linux64/chrome"
     service = Service('/usr/local/bin/chromedriver')
     driver = webdriver.Chrome(service=service, options=chrome_options)
@@ -125,4 +124,5 @@ def scrape():
         response_json = response_text.strip('`').strip('json').strip()
         events = json.loads(response_json)
         
+    driver.quit()
     return events
