@@ -47,5 +47,3 @@ def scrape():
         events.append({'show_name':show_name, 'date':date, 'link':url, 'img':img, 'venue':'המרץ2'})
         
     return events
-
-events = scrape()
