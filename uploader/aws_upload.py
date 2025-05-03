@@ -22,7 +22,7 @@ def upload_to_rds(df: pd.DataFrame, table_name: str = 'events', conflict_cols=No
 
     # ─── 2) Prep the engine + reflect your existing table ─────────────
     engine = create_engine(connection_string)
-    meta = MetaData(bind=engine)
+    meta = MetaData()
     tbl = Table(table_name, meta, autoload_with=engine)
 
     # ─── 3) Build the INSERT … ON CONFLICT statement ────────────────
