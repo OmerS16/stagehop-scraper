@@ -35,110 +35,114 @@ def scrape():
                 break
             
             return match
-    
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--window-size=1920,1080")
-    chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--single-process")
-    chrome_options.binary_location = "/usr/local/bin/chrome-linux64/chrome"
-    service = Service('/usr/local/bin/chromedriver')
-    driver = webdriver.Chrome(service=service, options=chrome_options)
-    
-    driver.get('https://www.instagram.com/holybar/p/DF2QTMlIsGL/?img_index=1')
-    
-    time.sleep(5)
-    
-    pattern = re.compile(r'(sessions?|lineup)', re.IGNORECASE)
-    
-    links = driver.find_elements(By.TAG_NAME, 'a')
-    links_url = [link.get_attribute('href') for link in links]
-    
-    post_pattern = re.compile(r'https://www.instagram.com/holybar/p/')
-    posts = [link_url for link_url in links_url if post_pattern.search(link_url or '')]
-    
-    last_post = posts[1]
-    driver.get(last_post)
-    time.sleep(5)
-    
-    profile_links = driver.find_elements(By.CSS_SELECTOR, "a[href='/holybar/']")
-    for elem in profile_links:
-        try:
-            post_body = elem.find_element(By.XPATH, "../../following-sibling::*[h1]/h1")
-            print("post body found")
-            post_text = post_body.text
-            post_text_clean = unicodedata.normalize("NFKC", post_text)
-            post_text_clean = re.sub(r'[^\x00-\x7F]+', '', post_text_clean)
-            post_text_clean = re.sub(r'^\s+', '', post_text_clean, flags=re.MULTILINE)
-            lineup = pattern.search(post_text_clean)
-            if lineup:
-                print('lineup word found, validating results..')
-                day_pattern = r'^(?:Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday).*'
-                matches = re.findall(day_pattern, post_text_clean, flags=re.MULTILINE)
-                break
-        except:
-            print('not found, continuing..')
-            continue
-    
-    events = []
-    
-    if matches:
-        for line in matches:
+    try:
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--window-size=1920,1080")
+        chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--single-process")
+        chrome_options.binary_location = "/usr/local/bin/chrome-linux64/chrome"
+        service = Service('/usr/local/bin/chromedriver')
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+        
+        driver.get('https://www.instagram.com/holybar/p/DF2QTMlIsGL/?img_index=1')
+        
+        time.sleep(5)
+        
+        pattern = re.compile(r'(sessions?|lineup)', re.IGNORECASE)
+        
+        links = driver.find_elements(By.TAG_NAME, 'a')
+        links_url = [link.get_attribute('href') for link in links]
+        
+        post_pattern = re.compile(r'https://www.instagram.com/holybar/p/')
+        posts = [link_url for link_url in links_url if post_pattern.search(link_url or '')]
+        
+        last_post = posts[1]
+        driver.get(last_post)
+        time.sleep(5)
+        
+        profile_links = driver.find_elements(By.CSS_SELECTOR, "a[href='/holybar/']")
+        matches = []
+        for elem in profile_links:
             try:
-                date, title = line.split(' - ', 1)
+                post_body = elem.find_element(By.XPATH, "../../following-sibling::*[h1]/h1")
+                print("post body found")
+                post_text = post_body.text
+                post_text_clean = unicodedata.normalize("NFKC", post_text)
+                post_text_clean = re.sub(r'[^\x00-\x7F]+', '', post_text_clean)
+                post_text_clean = re.sub(r'^\s+', '', post_text_clean, flags=re.MULTILINE)
+                lineup = pattern.search(post_text_clean)
+                if lineup:
+                    print('lineup word found, validating results..')
+                    day_pattern = r'^(?:Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday).*'
+                    matches = re.findall(day_pattern, post_text_clean, flags=re.MULTILINE)
+                    break
             except:
-                date, title = line.split('  ', 1)
-            title = title.strip()
-            date = date + ' 20:45'
-            date = datetime.strptime(date, '%A, %B %d %H:%M')
-            date = date.replace(year=datetime.now().year)
-            events.append({'show_name':title, 'date':date, 'link':last_post})
+                print('not found, continuing..')
+                continue
+        
+        events = []
+        
+        if matches:
+            for line in matches:
+                try:
+                    date, title = line.split(' - ', 1)
+                except:
+                    date, title = line.split('  ', 1)
+                title = title.strip()
+                date = date + ' 20:45'
+                date = datetime.strptime(date, '%A, %B %d %H:%M')
+                date = date.replace(year=datetime.now().year)
+                events.append({'show_name':title, 'date':date, 'link':last_post})
+            events = pd.DataFrame(events)
+        
+        else:
+            print("No lineup found in post's body..\nActivating AI..")
+            matching_img = find_matches(driver, pattern)
+        
+            if not matching_img:
+                raise IndexError('no lineup found')
+            
+            client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+            try:
+                response = client.responses.create(
+                    model="gpt-4o-mini",
+                    input=[{
+                        "role": "user",
+                        "content": [
+                            {"type": "input_text", "text": "Extract all the shows' names and dates to json with keys: show_name, date. Do not add any text to the response so I could convert your response to json."},
+                            {
+                                "type": "input_image",
+                                "image_url": matching_img,
+                            },
+                        ],
+                    }],
+                )
+                if response:
+                    print('AI successfully responded')
+            except:
+                print('AI failed to respond')
+
+            response_text = response.output_text
+            response_json = response_text.strip('`').strip('json').strip()
+            print(response_json)
+
+            try:
+                events = json.loads(response_json)
+            except:
+                print('Bad JSON given by AI')
+            
         events = pd.DataFrame(events)
-    
-    else:
-        print("No lineup found in post's body..\nActivating AI..")
-        matching_img = find_matches(driver, pattern)
-    
-        if not matching_img:
-            raise IndexError('no lineup found')
-        
-        client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
-        try:
-            response = client.responses.create(
-                model="gpt-4o-mini",
-                input=[{
-                    "role": "user",
-                    "content": [
-                        {"type": "input_text", "text": "Extract all the shows' names and dates to json with keys: show_name, date. Do not add any text to the response so I could convert your response to json."},
-                        {
-                            "type": "input_image",
-                            "image_url": matching_img,
-                        },
-                    ],
-                }],
-            )
-            if response:
-                print('AI successfully responded')
-        except:
-            print('AI failed to respond')
+        events['date'] = events['date'].apply(lambda x: datetime.strptime((x + ' 20:45'), '%d.%m %H:%M'))
+        events['date'] = events['date'].apply(lambda x: x.replace(year=datetime.now().year))
+        events['img'] = "https://instagram.ftlv8-1.fna.fbcdn.net/v/t51.2885-19/83984373_329182648085048_2078471099787075725_n.jpg?stp=dst-jpg_s320x320_tt6&_nc_ht=instagram.ftlv8-1.fna.fbcdn.net&_nc_cat=108&_nc_oc=Q6cZ2QEEgU0s_pdlx7KmCR0ged71YiCGuKqlPIjSMTEhcitnsKWjrDdafiJmjZHgP0BB53E&_nc_ohc=n_kCI-I_hAMQ7kNvwF0T_ae&_nc_gid=-ysnazI2jGVai6R063wiAQ&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AfFZ2zo0SOJWYap2PkvgRV_yiCMMjVObptG0WXpIsgZKvg&oe=681B109F&_nc_sid=8b3546"
+        events['venue'] = 'Holy Bar'
 
-        response_text = response.output_text
-        response_json = response_text.strip('`').strip('json').strip()
-        print(response_json)
+    finally:
+        driver.close()
+        driver.quit()
 
-        try:
-            events = json.loads(response_json)
-        except:
-            print('Bad JSON given by AI')
-        
-    driver.quit()
-
-    events = pd.DataFrame(events)
-    events['date'] = events['date'].apply(lambda x: datetime.strptime((x + ' 20:45'), '%d.%m %H:%M'))
-    events['date'] = events['date'].apply(lambda x: x.replace(year=datetime.now().year))
-    events['img'] = "https://instagram.ftlv8-1.fna.fbcdn.net/v/t51.2885-19/83984373_329182648085048_2078471099787075725_n.jpg?stp=dst-jpg_s320x320_tt6&_nc_ht=instagram.ftlv8-1.fna.fbcdn.net&_nc_cat=108&_nc_oc=Q6cZ2QEEgU0s_pdlx7KmCR0ged71YiCGuKqlPIjSMTEhcitnsKWjrDdafiJmjZHgP0BB53E&_nc_ohc=n_kCI-I_hAMQ7kNvwF0T_ae&_nc_gid=-ysnazI2jGVai6R063wiAQ&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AfFZ2zo0SOJWYap2PkvgRV_yiCMMjVObptG0WXpIsgZKvg&oe=681B109F&_nc_sid=8b3546"
-    events['venue'] = 'Holy Bar'
     return events
