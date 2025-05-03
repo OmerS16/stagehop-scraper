@@ -41,11 +41,12 @@ def scrape():
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--single-process")
-    chrome_options.binary_location = "/usr/local/bin/chrome-linux64/chrome"
-    service = Service('/usr/local/bin/chromedriver')
+    # chrome_options.add_argument("--no-sandbox")
+    # chrome_options.add_argument("--disable-dev-shm-usage")
+    # chrome_options.add_argument("--single-process")
+    # chrome_options.binary_location = "/usr/local/bin/chrome-linux64/chrome"
+    # service = Service('/usr/local/bin/chromedriver')
+    service = Service(r"C:\Users\Omer\Desktop\Coding\concerts project\scraper\chromedriver.exe")
     driver = webdriver.Chrome(service=service, options=chrome_options)
     
     driver.get('https://www.instagram.com/holybar/p/DF2QTMlIsGL/?img_index=1')
@@ -67,7 +68,6 @@ def scrape():
     profile_links = driver.find_elements(By.CSS_SELECTOR, "a[href='/holybar/']")
     for elem in profile_links:
         try:
-            print("Elem class:" + elem.get_attribute('class')[:32])
             post_body = elem.find_element(By.XPATH, "../../following-sibling::*[h1]/h1")
             print("post body found")
             post_text = post_body.text
@@ -127,7 +127,6 @@ def scrape():
             print('AI failed to respond')
 
         response_text = response.output_text
-        print(response_text)
         response_json = response_text.strip('`').strip('json').strip()
         print(response_json)
 
@@ -139,6 +138,8 @@ def scrape():
     driver.quit()
 
     events = pd.DataFrame(events)
+    events['date'] = events['date'].apply(lambda x: datetime.strptime((x + ' 20:45'), '%d.%m %H:%M'))
+    events['date'] = events['date'].apply(lambda x: x.replace(year=datetime.now().year))
     events['img'] = "https://instagram.ftlv8-1.fna.fbcdn.net/v/t51.2885-19/83984373_329182648085048_2078471099787075725_n.jpg?stp=dst-jpg_s320x320_tt6&_nc_ht=instagram.ftlv8-1.fna.fbcdn.net&_nc_cat=108&_nc_oc=Q6cZ2QEEgU0s_pdlx7KmCR0ged71YiCGuKqlPIjSMTEhcitnsKWjrDdafiJmjZHgP0BB53E&_nc_ohc=n_kCI-I_hAMQ7kNvwF0T_ae&_nc_gid=-ysnazI2jGVai6R063wiAQ&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AfFZ2zo0SOJWYap2PkvgRV_yiCMMjVObptG0WXpIsgZKvg&oe=681B109F&_nc_sid=8b3546"
     events['venue'] = 'Holy Bar'
     return events
