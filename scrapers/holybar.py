@@ -50,7 +50,7 @@ def scrape():
         
         driver.get('https://www.instagram.com/holybar/p/DF2QTMlIsGL/?img_index=1')
         
-        time.sleep(5)
+        time.sleep(10)
         
         pattern = re.compile(r'(sessions?|lineup)', re.IGNORECASE)
         
@@ -62,7 +62,7 @@ def scrape():
         
         last_post = posts[1]
         driver.get(last_post)
-        time.sleep(5)
+        time.sleep(10)
         
         profile_links = driver.find_elements(By.CSS_SELECTOR, "a[href='/holybar/']")
         matches = []

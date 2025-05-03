@@ -44,7 +44,7 @@ def scrape():
             date = date.strftime('%Y-%m-%d %H:%M:%S')
             img = event_details['whatsappImage']
             
-            events.append({'show_name':show_name, 'date':date, 'link':url, 'img':img, 'venue':'המרץ2'})
+            events.append({'show_name':show_name, 'date':date, 'link':url, 'img':img, 'venue':'המרץ 2'})
 
         events = pd.DataFrame(events)
 
