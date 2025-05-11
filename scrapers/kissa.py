@@ -49,7 +49,7 @@ def scrape():
         
         driver.get('https://www.instagram.com/jazzkissa.telaviv/p/DH50V0fNiq-/?img_index=1')
         
-        time.sleep(10)
+        time.sleep(20)
         
         today = datetime.today()
         current_month = today.strftime('%B')
