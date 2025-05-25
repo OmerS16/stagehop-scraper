@@ -3,7 +3,6 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 import re
-import json
 
 def scrape():
     url = "https://www.goshow.co.il/pages/place/1780"
