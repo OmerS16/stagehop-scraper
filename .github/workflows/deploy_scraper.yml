@@ -51,15 +51,14 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r main_scraper/requirements.txt pytest selenium xvfbwrapper
-          python - << 'EOF'
-import sys
-from xvfbwrapper import Xvfb
-import pytest
+          python - <<EOF
+            import sys
+            from xvfbwrapper import Xvfb
+            import pytest
 
-with Xvfb() as xvfb:
-    # xvfb.start() is called automatically in the context manager
-    sys.exit(pytest.main(["--maxfail=1", "--disable-warnings", "-q"]))
-EOF
+            with Xvfb() as xvfb:
+                sys.exit(pytest.main(["--maxfail=1", "--disable-warnings", "-q"]))
+          EOF
 
       # 6) Login to ECR
       - name: Login to Amazon ECR
