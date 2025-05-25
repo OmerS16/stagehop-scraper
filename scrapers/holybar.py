@@ -58,9 +58,21 @@ def scrape():
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--single-process")
-        chrome_options.binary_location = "/usr/local/bin/headless-chromium"
-        service = Service('/usr/local/bin/chromedriver')
-        driver = webdriver.Chrome(service=service, options=chrome_options)
+        try:
+            print('Setting binary location..')
+            chrome_options.binary_location = "/usr/local/bin/headless-chromium"
+        except Exception as e:
+            print(e)
+        try:
+            print('Setting service..')
+            service = Service('/usr/local/bin/chromedriver')
+        except Exception as e:
+            print(e)
+        try:
+            print('Setting up driver')
+            driver = webdriver.Chrome(service=service, options=chrome_options)
+        except Exception as e:
+            print(e)
         
         random_post = 'https://www.instagram.com/holybar/p/DF2QTMlIsGL/?img_index=1'
         driver.get(random_post)
