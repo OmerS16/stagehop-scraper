@@ -1,3 +1,4 @@
+# .github/workflows/deploy_scraper.yml
 name: CI/CD — Test, Build & Deploy Scraper Lambda Image
 
 on:
@@ -18,7 +19,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Configure AWS creds (so we can pull from S3)
+      # 2. Configure AWS creds (for S3 fetch)
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -32,17 +33,20 @@ jobs:
           mkdir -p main_scraper/bin
           aws s3 cp \
             s3://stagehop-lambda-dependencies/bin/headless-chromium \
-            main_scraper/bin/headless-chromium
+            main_scraper/bin/headless-chromium --region eu-central-1
           aws s3 cp \
             s3://stagehop-lambda-dependencies/bin/chromedriver \
-            main_scraper/bin/chromedriver
+            main_scraper/bin/chromedriver --region eu-central-1
           chmod +x main_scraper/bin/{headless-chromium,chromedriver}
 
-      # 4. Set up Python and run tests (with Chrome available)
-      - name: Set up Python & run pytest
+      # 4. Set up Python 3.10
+      - name: Set up Python 3.13
         uses: actions/setup-python@v4
         with:
           python-version: '3.13'
+
+      # 5. Run tests with pytest
+      - name: Run tests
         env:
           PYTHONPATH: ${{ github.workspace }}
           PATH: main_scraper/bin:/usr/local/bin:${{ env.PATH }}
@@ -52,13 +56,13 @@ jobs:
           pip install -r main_scraper/requirements.txt pytest selenium
           pytest --maxfail=1 --disable-warnings -q
 
-      # 5. Login to ECR
+      # 6. Log in to Amazon ECR
       - name: Login to Amazon ECR
         run: |
           aws ecr get-login-password --region eu-central-1 \
             | docker login --username AWS --password-stdin 251995574407.dkr.ecr.eu-central-1.amazonaws.com
 
-      # 6. Build, tag, and push the Docker image
+      # 7. Build, tag, and push the Docker image
       - name: Build & push Docker image
         run: |
           IMAGE_URI=251995574407.dkr.ecr.eu-central-1.amazonaws.com/scraper-lambda-repo:latest
@@ -66,7 +70,7 @@ jobs:
           docker tag scraper-lambda:latest $IMAGE_URI
           docker push $IMAGE_URI
 
-      # 7. Deploy to Lambda
+      # 8. Update Lambda to use the new image
       - name: Deploy to Lambda
         run: |
           aws lambda update-function-code \
