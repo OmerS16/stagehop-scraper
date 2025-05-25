@@ -15,11 +15,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout your repository
-      - name: Checkout code
-        uses: actions/checkout@v3
+      # 1) Checkout
+      - uses: actions/checkout@v3
 
-      # 2. Configure AWS creds (for S3 fetch)
+      # 2) Configure AWS creds for S3
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -27,42 +26,43 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region:            eu-central-1
 
-      # 3. Fetch headless-chromium + chromedriver from S3
+      # 3) Pull your Chrome binaries from S3
       - name: Prepare Chrome binaries
         run: |
           mkdir -p main_scraper/bin
-          aws s3 cp \
-            s3://stagehop-lambda-dependencies/bin/headless-chromium \
+          aws s3 cp s3://stagehop-lambda-dependencies/bin/headless-chromium \
             main_scraper/bin/headless-chromium --region eu-central-1
-          aws s3 cp \
-            s3://stagehop-lambda-dependencies/bin/chromedriver \
+          aws s3 cp s3://stagehop-lambda-dependencies/bin/chromedriver \
             main_scraper/bin/chromedriver --region eu-central-1
           chmod +x main_scraper/bin/{headless-chromium,chromedriver}
 
-      # 4. Set up Python 3.10
-      - name: Set up Python 3.13
+      # 4) Set up Python 3.13
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.13'
 
-      # 5. Run tests with pytest
-      - name: Run tests
+      # 5) Install and run tests under Xvfb
+      - name: Run scraper tests
         env:
           PYTHONPATH: ${{ github.workspace }}
           PATH: main_scraper/bin:/usr/local/bin:${{ env.PATH }}
           CHROME_BIN: main_scraper/bin/headless-chromium
         run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb
           python -m pip install --upgrade pip
           pip install -r main_scraper/requirements.txt pytest selenium
-          pytest --maxfail=1 --disable-warnings -q
+          xvfb-run -a pytest --maxfail=1 --disable-warnings -q
 
-      # 6. Log in to Amazon ECR
+      # 6) Login to ECR
       - name: Login to Amazon ECR
         run: |
           aws ecr get-login-password --region eu-central-1 \
-            | docker login --username AWS --password-stdin 251995574407.dkr.ecr.eu-central-1.amazonaws.com
+            | docker login --username AWS \
+              --password-stdin 251995574407.dkr.ecr.eu-central-1.amazonaws.com
 
-      # 7. Build, tag, and push the Docker image
+      # 7) Build & push image
       - name: Build & push Docker image
         run: |
           IMAGE_URI=251995574407.dkr.ecr.eu-central-1.amazonaws.com/scraper-lambda-repo:latest
@@ -70,11 +70,11 @@ jobs:
           docker tag scraper-lambda:latest $IMAGE_URI
           docker push $IMAGE_URI
 
-      # 8. Update Lambda to use the new image
+      # 8) Deploy to Lambda
       - name: Deploy to Lambda
         run: |
           aws lambda update-function-code \
             --function-name scraper-lambda \
             --region eu-central-1 \
-            --image-uri 251995574407.dkr.ecr.eu-central-1.amazonaws.com/scraper-lambda-repo:latest \
+            --image-uri $IMAGE_URI \
             --publish
