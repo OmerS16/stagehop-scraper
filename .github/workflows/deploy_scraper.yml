@@ -34,6 +34,8 @@ jobs:
 
       # 4. Run the scraper tests
       - name: Run tests with pytest
+        env:
+          PYTHONPATH: ${{ github.workspace }}
         run: pytest --maxfail=1 --disable-warnings -q
 
       # 5. Configure AWS credentials for S3, ECR & Lambda
