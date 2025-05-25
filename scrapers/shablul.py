@@ -16,7 +16,7 @@ def scrape():
     
     events = []
     
-    for show_num, event in enumerate(soup.find_all('div', class_='show_cube col-lg-4 col-sm-6 col-xs-12'), 0):
+    for show_num, event in enumerate(soup.find_all('div', class_='show_cube col-lg-4 col-sm-6 col-xs-12'), 1):
         title = event.find('div', id=f'show_name_{show_num}').get_text(strip=True)
         if title == 'הירשמו לעדכונים':
             continue

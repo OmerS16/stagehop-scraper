@@ -19,7 +19,7 @@ def scrape():
         if title == 'מופעים נוספים יתעדכנו בקרוב':
             continue
         date = event_container.find('span', class_='jet-button__label').get_text(strip=True)
-        date = date.strip('/')
+        date = date.strip('/.')
         hour_container = event_container.find(lambda tag: tag.has_attr('class') and tag.get_text(strip=True) == 'פתיחת דלתות')
         hour_container = ' '.join(hour_container.get('class'))
         hour_container = event_container.find('div', class_=hour_container)

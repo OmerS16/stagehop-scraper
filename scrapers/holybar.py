@@ -58,7 +58,7 @@ def scrape():
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--single-process")
-        chrome_options.binary_location = "/usr/local/bin/chrome-linux64/chrome"
+        chrome_options.binary_location = "/usr/local/bin/headless-chromium"
         service = Service('/usr/local/bin/chromedriver')
         driver = webdriver.Chrome(service=service, options=chrome_options)
         
