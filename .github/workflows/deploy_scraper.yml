@@ -42,7 +42,7 @@ jobs:
         with:
           python-version: '3.13'
 
-      # 5) Install and run tests under Xvfb (no sudo)
+      # 5) Install and run tests under Xvfb via Python wrapper
       - name: Run scraper tests
         env:
           PYTHONPATH: ${{ github.workspace }}
@@ -50,8 +50,16 @@ jobs:
           CHROME_BIN: main_scraper/bin/headless-chromium
         run: |
           python -m pip install --upgrade pip
-          pip install -r main_scraper/requirements.txt pytest selenium
-          xvfb-run -a pytest --maxfail=1 --disable-warnings -q
+          pip install -r main_scraper/requirements.txt pytest selenium xvfbwrapper
+          python - << 'EOF'
+import sys
+from xvfbwrapper import Xvfb
+import pytest
+
+with Xvfb() as xvfb:
+    # xvfb.start() is called automatically in the context manager
+    sys.exit(pytest.main(["--maxfail=1", "--disable-warnings", "-q"]))
+EOF
 
       # 6) Login to ECR
       - name: Login to Amazon ECR
