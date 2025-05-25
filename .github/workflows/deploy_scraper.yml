@@ -42,15 +42,13 @@ jobs:
         with:
           python-version: '3.13'
 
-      # 5) Install and run tests under Xvfb
+      # 5) Install and run tests under Xvfb (no sudo)
       - name: Run scraper tests
         env:
           PYTHONPATH: ${{ github.workspace }}
           PATH: main_scraper/bin:/usr/local/bin:${{ env.PATH }}
           CHROME_BIN: main_scraper/bin/headless-chromium
         run: |
-          sudo apt-get update
-          sudo apt-get install -y xvfb
           python -m pip install --upgrade pip
           pip install -r main_scraper/requirements.txt pytest selenium
           xvfb-run -a pytest --maxfail=1 --disable-warnings -q
