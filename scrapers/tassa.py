@@ -4,6 +4,12 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 
 def scrape():
+    
+    FORMATS = [
+        '%d.%m.%Y %H:%M',
+        '%d/%m/%Y %H:%M',
+        ]
+    
     url = 'https://tassatlv.co.il/collections/%D7%94%D7%95%D7%A4%D7%A2%D7%95%D7%AA'
     
     response = requests.get(url)
@@ -24,7 +30,12 @@ def scrape():
         hour = inner_soup.find('p', class_='custom-icon-3 product__text rte text-base').get_text(strip=True)
         hour = hour.replace(': תחילת מופע', '')
         date = date + ' ' + hour
-        date = datetime.strptime(date, '%d.%m.%Y %H:%M')
+        for frmt in FORMATS:
+            try:
+                date = datetime.strptime(date, frmt)
+                break
+            except ValueError:
+                continue
         img = title_container.find('img').get('src')
         events.append({'show_name':title, 'date':date, 'link':link, 'img':img, 'venue':'TASSA'})
         
