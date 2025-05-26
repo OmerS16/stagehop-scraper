@@ -21,7 +21,7 @@ def scrape():
         chrome_options.add_argument("--single-process")
         try:
             print('Setting binary location..')
-            chrome_options.binary_location = "/usr/local/bin/chrome-linux64/chrome"
+            chrome_options.binary_location = "/usr/local/bin/chrome-linux64/chrome-headless-shell"
         except Exception as e:
             print(e)
         try:
