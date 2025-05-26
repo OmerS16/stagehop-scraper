@@ -13,8 +13,6 @@ import os, tempfile, shutil
 def scrape():
     try:
         user_data_dir = tempfile.mkdtemp(prefix="chrome-profile-", dir='/tmp')
-        print(f"Using Chrome user-data-dir: {user_data_dir}")
-        print(f"Contents before launch: {os.listdir(user_data_dir)}")
         chrome_options = Options()
         chrome_options.add_argument("--headless=new")
         chrome_options.add_argument("--disable-gpu")

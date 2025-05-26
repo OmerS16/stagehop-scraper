@@ -66,6 +66,8 @@ def scrape():
         chrome_options.add_argument("--disable-background-networking")
         chrome_options.add_argument("--disable-default-apps")
         chrome_options.add_argument("--disable-features=VizDisplayCompositor")
+        chrome_options.binary_location = "/usr/local/bin/chrome-linux64/chrome"
+        service = Service('/usr/local/bin/chromedriver')
         try:
             print("Launching Chrome...")
             driver = webdriver.Chrome(service=service, options=chrome_options)
