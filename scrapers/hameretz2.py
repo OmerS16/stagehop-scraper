@@ -26,7 +26,6 @@ def scrape():
         chrome_options.add_argument("--single-process")
         chrome_options.add_argument(f"--user-data-dir={user_data_dir}")
         chrome_options.add_argument("--no-first-run")
-        chrome_options.add_argument("--remote-debugging-port=9222")
         chrome_options.add_argument("--disable-extensions")
         chrome_options.add_argument("--disable-background-networking")
         chrome_options.add_argument("--disable-default-apps")
