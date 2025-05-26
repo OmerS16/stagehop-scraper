@@ -157,7 +157,7 @@ def scrape():
             client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
             try:
                 response = client.responses.create(
-                    model="gpt-4o-mini",
+                    model="gpt-4.1-mini",
                     input=[{
                         "role": "user",
                         "content": [
