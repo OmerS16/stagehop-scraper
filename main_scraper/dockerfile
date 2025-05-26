@@ -45,7 +45,7 @@ COPY scrapers/ ${LAMBDA_TASK_ROOT}/scrapers
 COPY main_scraper/bin/chromedriver /usr/local/bin/chromedriver
 RUN chmod +x /usr/local/bin/chromedriver
 
-COPY main_scraper/bin/chrome-linux64/chrome /usr/local/bin/chrome-linux64/chrome
+COPY main_scraper/bin/chrome-linux64/ /usr/local/bin/chrome-linux64/
 RUN chmod +x /usr/local/bin/chrome-linux64/chrome
 
 # Set environment variables so Lambda and Selenium can find them
