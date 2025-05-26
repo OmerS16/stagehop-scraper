@@ -56,17 +56,42 @@ jobs:
           docker tag scraper-lambda:latest $IMAGE
           docker push $IMAGE
 
-          docker run --rm $IMAGE bash -lc "\
-          echo '→ Chrome:' \$((/usr/local/bin/chrome-linux64/chrome --version) 2>&1); \
-          echo '→ Driver:' \$((/usr/local/bin/chromedriver --version) 2>&1)"
-          docker run --rm $IMAGE bash -lc "\
-            ldd /usr/local/bin/chrome-linux64/chrome | grep 'not found' || echo 'Chrome all libs OK'; \
-            ldd /usr/local/bin/chromedriver | grep 'not found' || echo 'Driver all libs OK'"
+      - name: Chrome & Chromedriver versions
+        shell: bash
+        run: |
+          IMAGE=251995574407.dkr.ecr.eu-central-1.amazonaws.com/scraper-lambda-repo:latest
+          # ensure we have the right tag
+          docker tag scraper-lambda:latest $IMAGE
+          docker push $IMAGE
+
+          echo "→ Chrome version inside container:"
+          docker run --rm $IMAGE bash -lc "/usr/local/bin/chrome-linux64/chrome --version"
+
+          echo "→ Chromedriver version inside container:"
+          docker run --rm $IMAGE bash -lc "chromedriver --version"
+
+      - name: Missing shared-libs
+        shell: bash
+        run: |
+          IMAGE=251995574407.dkr.ecr.eu-central-1.amazonaws.com/scraper-lambda-repo:latest
+          echo "Checking Chrome dependencies…"
+          docker run --rm $IMAGE bash -lc "ldd /usr/local/bin/chrome-linux64/chrome | grep 'not found' || echo 'All Chrome .so OK'"
+          echo "Checking Chromedriver dependencies…"
+          docker run --rm $IMAGE bash -lc "ldd /usr/local/bin/chromedriver | grep 'not found' || echo 'All driver .so OK'"
+
+      - name: Bare-bones headless test
+        shell: bash
+        run: |
+          IMAGE=251995574407.dkr.ecr.eu-central-1.amazonaws.com/scraper-lambda-repo:latest
+          echo "Running headless dump-DOM against example.com…"
           docker run --rm $IMAGE bash -lc "\
             /usr/local/bin/chrome-linux64/chrome \
-              --headless=new --no-sandbox --disable-setuid-sandbox \
-              --disable-dev-shm-usage --dump-dom https://example.com \
-            || echo 'HEADLESS FAIL';"
+              --headless=new \
+              --no-sandbox \
+              --disable-setuid-sandbox \
+              --disable-dev-shm-usage \
+              --dump-dom https://example.com \
+            || echo '❌ HEADLESS FAIL'"
             
       # 6. Update Lambda to use the new image
       - name: Deploy to Lambda
