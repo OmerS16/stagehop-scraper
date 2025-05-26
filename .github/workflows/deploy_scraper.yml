@@ -55,6 +55,26 @@ jobs:
           docker build -t scraper-lambda -f main_scraper/dockerfile .
           docker tag scraper-lambda:latest $IMAGE
           docker push $IMAGE
+
+      - name: Chrome version
+        run: |
+          IMAGE=251995574407.dkr.ecr.eu-central-1.amazonaws.com/scraper-lambda-repo:latest
+          docker run --rm --entrypoint bash $IMAGE -lc "/usr/local/bin/chrome-linux64/chrome --version"
+      
+      - name: Missing libs
+        run: |
+          IMAGE=251995574407.dkr.ecr.eu-central-1.amazonaws.com/scraper-lambda-repo:latest
+          docker run --rm --entrypoint bash $IMAGE -lc "ldd /usr/local/bin/chrome-linux64/chrome | grep 'not found' || echo OK"
+      
+      - name: Headless smoke test
+        run: |
+          IMAGE=251995574407.dkr.ecr.eu-central-1.amazonaws.com/scraper-lambda-repo:latest
+          docker run --rm --entrypoint bash $IMAGE -lc "\
+            /usr/local/bin/chrome-linux64/chrome \
+              --headless=new --no-sandbox --disable-setuid-sandbox \
+              --disable-dev-shm-usage --dump-dom https://example.com \
+            || echo 'HEADLESS FAIL'"
+            
       # 6. Update Lambda to use the new image
       - name: Deploy to Lambda
         run: |
