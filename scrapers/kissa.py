@@ -10,7 +10,7 @@ import re
 from datetime import datetime
 import time
 from openai import OpenAI
-import os
+import os, tempfile, shutil
 import json
 
 def scrape():
@@ -121,7 +121,6 @@ def scrape():
         events['venue'] = 'Jazz Kissa'
 
     finally:
-        driver.close()
         driver.quit()
         shutil.rmtree(user_data_dir, ignore_errors=True)
 

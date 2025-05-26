@@ -11,7 +11,7 @@ from datetime import datetime, date as Date
 import time
 import unicodedata
 from openai import OpenAI
-import os
+import os, tempfile, shutil
 import json
 import calendar
 
@@ -190,7 +190,6 @@ def scrape():
         events['venue'] = 'Holy Bar'
 
     finally:
-        driver.close()
         driver.quit()
         shutil.rmtree(user_data_dir, ignore_errors=True)
 
