@@ -12,7 +12,7 @@ import os, tempfile, shutil
 
 def scrape():
     try:
-        user_data_dir = tempfile.mkdtemp(prefix="chrome-profile-")
+        user_data_dir = tempfile.mkdtemp(prefix="chrome-profile-", dir='/tmp')
         print(f"Using Chrome user-data-dir: {user_data_dir}")
         print(f"Contents before launch: {os.listdir(user_data_dir)}")
         chrome_options = Options()
@@ -32,6 +32,7 @@ def scrape():
         chrome_options.add_argument("--disable-default-apps")
         chrome_options.add_argument("--enable-logging")
         chrome_options.add_argument("--v=1")
+        chrome_options.add_argument("--disable-features=VizDisplayCompositor")
         chrome_options.binary_location = "/usr/local/bin/chrome-linux64/chrome"
         service = Service('/usr/local/bin/chromedriver')
         try:
