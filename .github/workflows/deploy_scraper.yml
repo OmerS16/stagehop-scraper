@@ -30,10 +30,11 @@ jobs:
       - name: Download headless-chrome from S3
         run: |
           mkdir -p main_scraper/bin/chrome-linux64
-          aws s3 cp \
-            s3://stagehop-lambda-dependencies/chrome-linux64/ \
-            main_scraper/bin/chrome-linux64/ \
-            --recursive --region eu-central-1
+          aws s3 sync \
+            s3://stagehop-lambda-dependencies/chrome-linux64 \
+            main_scraper/bin/chrome-linux64 \
+            --region eu-central-1
+          ls -l main_scraper/bin/chrome-linux64
           chmod +x main_scraper/bin/chrome-linux64/chrome-headless-shell
       - name: Download chromedriver from S3
         run: |
