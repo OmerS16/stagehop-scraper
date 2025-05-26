@@ -12,11 +12,9 @@ import os, tempfile, shutil, logging
 
 def scrape():
     try:
-        logger = logging.getLogger()
-        logger.setLevel(logging.info)
         user_data_dir = tempfile.mkdtemp(prefix="chrome-profile-")
-        logger.info(f"Using Chrome user-data-dir: {profile_dir}")
-        logger.info(f"Contents before launch: {os.listdir(profile_dir)}")
+        print(f"Using Chrome user-data-dir: {user_data_dir}")
+        print(f"Contents before launch: {os.listdir(user_data_dir)}")
         chrome_options = Options()
         chrome_options.add_argument("--headless")
         chrome_options.add_argument("--disable-gpu")
@@ -34,11 +32,11 @@ def scrape():
         chrome_options.binary_location = "/usr/local/bin/chrome-linux64/chrome-headless-shell"
         service = Service('/usr/local/bin/chromedriver')
         try:
-            logger.info("Launching Chrome...")
+            print("Launching Chrome...")
             driver = webdriver.Chrome(service=service, options=chrome_options)
-            logger.info("Chrome launched successfully!")
+            print("Chrome launched successfully!")
         except Exception as e:
-            logger.error("Failed to start Chrome WebDriver", exc_info=e)
+            print(e)
             
         
         driver.get("https://test.hameretz2.org/")
