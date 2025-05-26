@@ -19,6 +19,7 @@ def scrape():
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--single-process")
+        chrome_options.add_argument("--user-data-dir=/tmp/chrome-data")
         try:
             print('Setting binary location..')
             chrome_options.binary_location = "/usr/local/bin/chrome-linux64/chrome-headless-shell"
