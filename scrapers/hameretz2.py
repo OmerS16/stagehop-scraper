@@ -8,11 +8,14 @@ import json
 from dateutil import parser
 import pytz
 import pandas as pd
-import os, tempfile, shutil
+import os, tempfile, shutil, logging
 
 def scrape():
     try:
-        user_data_dir = tempfile.mkdtemp(prefix="chrome-data-")
+        logging.basicConfig(level=logging.INFO)
+        user_data_dir = tempfile.mkdtemp(prefix="chrome-profile-")
+        logging.info(f"Using Chrome user-data-dir: {profile_dir}")
+        logging.info(f"Contents before launch: {os.listdir(profile_dir)}")
         chrome_options = Options()
         chrome_options.add_argument("--headless")
         chrome_options.add_argument("--disable-gpu")
@@ -24,21 +27,18 @@ def scrape():
         chrome_options.add_argument(f"--user-data-dir={user_data_dir}")
         chrome_options.add_argument("--no-first-run")
         chrome_options.add_argument("--remote-debugging-port=9222")
+        chrome_options.add_argument("--disable-extensions")
+        chrome_options.add_argument("--disable-background-networking")
+        chrome_options.add_argument("--disable-default-apps")
+        chrome_options.binary_location = "/usr/local/bin/chrome-linux64/chrome-headless-shell"
+        service = Service('/usr/local/bin/chromedriver')
         try:
-            print('Setting binary location..')
-            chrome_options.binary_location = "/usr/local/bin/chrome-linux64/chrome-headless-shell"
-        except Exception as e:
-            print(e)
-        try:
-            print('Setting service..')
-            service = Service('/usr/local/bin/chromedriver')
-        except Exception as e:
-            print(e)
-        try:
-            print('Setting up driver')
+            logging.info("Launching Chrome...")
             driver = webdriver.Chrome(service=service, options=chrome_options)
+            logging.info("Chrome launched successfully!")
         except Exception as e:
-            print(e)
+            logging.error("Failed to start Chrome WebDriver", exc_info=e)
+            raise
         
         driver.get("https://test.hameretz2.org/")
         
