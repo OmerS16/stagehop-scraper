@@ -50,6 +50,7 @@ def scrape():
             
             return match
     try:
+        user_data_dir = tempfile.mkdtemp(prefix="chrome-data-")
         chrome_options = Options()
         chrome_options.add_argument("--headless")
         chrome_options.add_argument("--disable-gpu")
@@ -58,7 +59,7 @@ def scrape():
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--single-process")
-        chrome_options.add_argument("--user-data-dir=/tmp/chrome-data")
+        chrome_options.add_argument(f"--user-data-dir={user_data_dir}")
         try:
             print('Setting binary location..')
             chrome_options.binary_location = "/usr/local/bin/chrome-linux64/chrome-headless-shell"
@@ -194,5 +195,6 @@ def scrape():
     finally:
         driver.close()
         driver.quit()
+        shutil.rmtree(user_data_dir, ignore_errors=True)
 
     return events
