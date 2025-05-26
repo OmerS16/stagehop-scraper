@@ -34,7 +34,7 @@ jobs:
             s3://stagehop-lambda-dependencies/chrome-linux64/ \
             main_scraper/bin/chrome-linux64/ \
             --recursive --region eu-central-1
-          chmod +x main_scraper/bin/chrome-linux64/chrome
+          chmod +x main_scraper/bin/chrome-linux64/chrome-headless-shell
       - name: Download chromedriver from S3
         run: |
           aws s3 cp \
