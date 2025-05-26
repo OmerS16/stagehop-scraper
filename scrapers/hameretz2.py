@@ -19,19 +19,17 @@ def scrape():
         chrome_options.add_argument("--headless=new")
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--window-size=1920,1080")
-        chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+        chrome_options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-setuid-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
-        # chrome_options.add_argument("--single-process")
+        chrome_options.add_argument("--single-process")
         chrome_options.add_argument(f"--user-data-dir={user_data_dir}")
         chrome_options.add_argument("--no-first-run")
         chrome_options.add_argument("--remote-debugging-port=9222")
         chrome_options.add_argument("--disable-extensions")
         chrome_options.add_argument("--disable-background-networking")
         chrome_options.add_argument("--disable-default-apps")
-        chrome_options.add_argument("--enable-logging")
-        chrome_options.add_argument("--v=1")
         chrome_options.add_argument("--disable-features=VizDisplayCompositor")
         chrome_options.binary_location = "/usr/local/bin/chrome-linux64/chrome"
         service = Service('/usr/local/bin/chromedriver')
@@ -69,7 +67,6 @@ def scrape():
         events = pd.DataFrame(events)
 
     finally:
-        driver.close()
         driver.quit()
         shutil.rmtree(user_data_dir, ignore_errors=True)
         
