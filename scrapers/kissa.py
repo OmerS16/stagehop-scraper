@@ -47,7 +47,7 @@ def scrape():
         chrome_options.add_argument(f"--user-data-dir={user_data_dir}")
         try:
             print('Setting binary location..')
-            chrome_options.binary_location = "/usr/local/bin/chrome-linux64/chrome-headless-shell"
+            chrome_options.binary_location = "/usr/local/bin/chrome-linux64/chrome"
         except Exception as e:
             print(e)
         try:

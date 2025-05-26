@@ -8,7 +8,7 @@ import json
 from dateutil import parser
 import pytz
 import pandas as pd
-import os, tempfile, shutil, logging
+import os, tempfile, shutil
 
 def scrape():
     try:
@@ -29,7 +29,7 @@ def scrape():
         chrome_options.add_argument("--disable-extensions")
         chrome_options.add_argument("--disable-background-networking")
         chrome_options.add_argument("--disable-default-apps")
-        chrome_options.binary_location = "/usr/local/bin/chrome-linux64/chrome-headless-shell"
+        chrome_options.binary_location = "/usr/local/bin/chrome-linux64/chrome"
         service = Service('/usr/local/bin/chromedriver')
         try:
             print("Launching Chrome...")
