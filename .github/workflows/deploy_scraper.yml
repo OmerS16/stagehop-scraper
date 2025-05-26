@@ -26,14 +26,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region:            eu-central-1
 
-      # 3. Fetch headless-chromium and chromedriver from S3 into build context
-      - name: Download headless-chromium from S3
+      # 3. Fetch headless-chrome and chromedriver from S3 into build context
+      - name: Download headless-chrome from S3
         run: |
-          mkdir -p main_scraper/bin
+          mkdir -p main_scraper/bin/chrome-linux64
           aws s3 cp \
-            s3://stagehop-lambda-dependencies/bin/headless-chromium \
-            main_scraper/bin/headless-chromium --region eu-central-1
-          chmod +x main_scraper/bin/headless-chromium
+            s3://stagehop-lambda-dependencies/chrome-linux64/ \
+            main_scraper/bin/chrome-linux64/ \
+            --recursive --region eu-central-1
+          chmod +x main_scraper/bin/chrome-linux64/chrome
       - name: Download chromedriver from S3
         run: |
           aws s3 cp \
