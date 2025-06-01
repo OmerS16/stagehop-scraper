@@ -13,7 +13,6 @@ def lambda_handler(event, context):
             "body": json.dumps({"message": "No events found."})
         }
 
-    # Upload to S3
     csv_buffer = StringIO()
     events.to_csv(csv_buffer, index=False)
     
