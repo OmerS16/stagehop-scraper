@@ -14,8 +14,32 @@ import os, tempfile, shutil
 import json
 
 def scrape():
+    """
+    Navigate Jazz Kissa’s Instagram to pull the latest post, find the image
+    containing the current month’s lineup, and ask OpenAI to extract show names
+    and dates.
+
+    Steps:
+      1. Launch headless Chrome with a temporary user profile.
+      2. Open a known Jazz Kissa post to collect all post URLs.
+      3. Load the second-most-recent post and slide through carousel images until
+         one matches the current month & year in its alt text.
+      4. Send that lineup image to OpenAI with a prompt to return JSON of
+         {'show_name', 'date', 'hour'} entries.
+      5. Parse the JSON into a DataFrame, combine date & hour into a datetime
+         column, and add metadata (link, img, venue).
+      6. Clean up browser and temporary files.
+
+    Returns:
+        pandas.DataFrame with columns:
+        ['show_name', 'date', 'link', 'img', 'venue']
+    """
+
     def find_matches(driver, pattern):
-        match = False
+        """
+        Advance through the Instagram carousel until an <img> alt-text matches
+        the regex `pattern`. Returns the matching image URL or False.
+        """
         wait = WebDriverWait(driver, 5)
         
         while True:
@@ -23,18 +47,19 @@ def scrape():
             for img in images:
                 alt = img.get_attribute('alt') or ''
                 if pattern.search(alt):
-                    match = img.get_attribute('src')
-                    return match
+                    return img.get_attribute('src')
                 
             try:
+                # Click the "Next" button in the carousel
                 next_btn = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[aria-label='Next']")))
                 next_btn.click()
                 time.sleep(1)
             except (NoSuchElementException, TimeoutException):
                 break
             
-            return match
+        return False
     try:
+        # Prepare temporary Chrome profile to avoid cache conflicts
         user_data_dir = tempfile.mkdtemp(prefix="chrome-data-")
         chrome_options = Options()
         chrome_options.add_argument("--headless=new")
@@ -53,6 +78,7 @@ def scrape():
         chrome_options.add_argument("--disable-features=VizDisplayCompositor")
         chrome_options.binary_location = "/usr/local/bin/chrome-linux64/chrome"
         service = Service('/usr/local/bin/chromedriver')
+
         try:
             print("Launching Chrome...")
             driver = webdriver.Chrome(service=service, options=chrome_options)
@@ -60,31 +86,30 @@ def scrape():
         except Exception as e:
             print(e)
 
+        # Go to a sample post to gather all Jazz Kissa post URLs
         driver.get('https://www.instagram.com/jazzkissa.telaviv/p/DH50V0fNiq-/?img_index=1')
-        
         time.sleep(20)
-        
-        today = datetime.today()
-        current_month = today.strftime('%B')
-        current_year = today.strftime('%Y')
-        
-        pattern = re.compile(rf'{current_month} {current_year}', re.IGNORECASE)
-        
-        links = driver.find_elements(By.TAG_NAME, 'a')
-        links_url = [link.get_attribute('href') for link in links]
-        
+        links = [a.get_attribute('href') for a in driver.find_elements(By.TAG_NAME, 'a')]
         post_pattern = re.compile(r'https://www.instagram.com/jazzkissa.telaviv/p/')
-        posts = [link_url for link_url in links_url if post_pattern.search(link_url or '')]
+        posts = [url for url in links if post_pattern.search(url or '')]
         
+        # Visit the second-most-recent post
         last_post = posts[1]
         driver.get(last_post)
         time.sleep(5)
+
+        # Find the carousel image matching current month & year
+        today = datetime.today()
+        current_month = today.strftime('%B')
+        current_year = today.strftime('%Y')
+
+        pattern = re.compile(rf'{current_month} {current_year}', re.IGNORECASE)
         
         matching_img = find_matches(driver, pattern)
-    
         if not matching_img:
             raise IndexError('no lineup found')
         
+        # Ask OpenAI to extract show details from the matching image
         client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
         try:
             response = client.responses.create(
@@ -114,15 +139,16 @@ def scrape():
         except:
             print('Bad JSON given by AI')
             
+        # Build DataFrame and finalize columns
         events = pd.DataFrame(events)
-        events['date'] = events['date'] + ' ' + events['hour']
-        events['date'] = events['date'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M'))
+        events['date'] = pd.to_datetime(events['date'] + ' ' + events['hour'], format='%Y-%m-%d %H:%M')
         events = events.drop('hour', axis=1)
         events['link'] = last_post
         events['img'] = matching_img
         events['venue'] = 'Jazz Kissa'
 
     finally:
+        # Ensure cleanup of browser process and temp data
         driver.quit()
         shutil.rmtree(user_data_dir, ignore_errors=True)
 
